@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package admin;
+
+option go_package = "pb/admin;admin";
+
+import "google/protobuf/timestamp.proto";
+
+// 管理员角色枚举
+enum AdminRole {
+    ROLE_UNKNOWN = 0;         // 未知
+    ROLE_SUPER_ADMIN = 1;     // 超级管理员（所有权限）
+    ROLE_ADMIN = 2;           // 普通管理员
+    ROLE_OPERATOR = 3;        // 操作员（部分权限）
+}
+
+// 管理员状态枚举
+enum AdminStatus {
+    STATUS_UNKNOWN = 0;       // 未知
+    STATUS_ACTIVE = 1;        // 正常
+    STATUS_DISABLED = 2;      // 禁用
+    STATUS_DELETED = 3;       // 已删除
+}
+
+// 管理员服务
+service AdminService {
+    // 健康检查
+    rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
+    
+    // 管理员登录
+    rpc Login (LoginRequest) returns (LoginResponse);
+    
+    // 获取管理员信息
+    rpc GetAdmin (GetAdminRequest) returns (Admin);
+    
+    // 更新管理员信息
+    rpc UpdateAdmin (UpdateAdminRequest) returns (Admin);
+    
+    // 上传头像
+    rpc UploadAvatar (UploadAvatarRequest) returns (UploadResponse);
+    
+    // 列出管理员
+    rpc ListAdmins (ListAdminsRequest) returns (ListAdminsResponse);
+}
+
+// 健康检查请求
+message HealthCheckRequest {}
+
+// 健康检查响应
+message HealthCheckResponse {
+    string status = 1;      // 状态: serving/not_serving
+    int64 timestamp = 2;    // 时间戳
+    string version = 3;     // 服务版本
+}
+
+// 登录请求
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+// 登录响应
+message LoginResponse {
+    string token = 1;
+    Admin admin = 2;
+}
+
+// 获取管理员请求
+message GetAdminRequest {
+    int64 id = 1;
+}
+
+// 更新管理员请求
+message UpdateAdminRequest {
+    int64 id = 1;
+    string username = 2;
+    string email = 3;
+    string role = 4;
+}
+
+// 上传头像请求
+message UploadAvatarRequest {
+    int64 admin_id = 1;       // 管理员ID
+    string avatar_url = 2;    // 头像URL（OSS/S3地址）
+}
+
+// 上传响应
+message UploadResponse {
+    string file_url = 1;      // 文件URL
+    string file_id = 2;       // 文件ID
+    string file_type = 3;     // 文件类型
+    int64 file_size = 4;      // 文件大小（字节）
+}
+
+// 列出管理员请求
+message ListAdminsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+}
+
+// 列出管理员响应
+message ListAdminsResponse {
+    repeated Admin admins = 1;
+    int32 total = 2;
+}
+
+// 管理员信息
+message Admin {
+    int64 id = 1;
+    string username = 2;
+    string email = 3;
+    string phone = 4;           // 手机号
+    string avatar_url = 5;      // 头像URL
+    AdminRole role = 6;         // 角色
+    AdminStatus status = 7;     // 状态
+    repeated string permissions = 8;  // 权限列表
+    google.protobuf.Timestamp last_login_at = 9;   // 最后登录时间
+    string last_login_ip = 10;  // 最后登录IP
+    google.protobuf.Timestamp created_at = 11;     // 创建时间
+    google.protobuf.Timestamp updated_at = 12;     // 更新时间
+}

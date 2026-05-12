@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "pb/ai;ai";
+
+import "google/protobuf/timestamp.proto";
+
+// AI 服务
+service AIService {
+    // 健康检查
+    rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
+    
+    // 聊天对话
+    rpc Chat (ChatRequest) returns (ChatResponse);
+    
+    // 生成文本嵌入向量
+    rpc Embedding (EmbeddingRequest) returns (EmbeddingResponse);
+    
+    // 流式聊天
+    rpc StreamChat (ChatRequest) returns (stream ChatResponse);
+}
+
+// 健康检查请求
+message HealthCheckRequest {}
+
+// 健康检查响应
+message HealthCheckResponse {
+    string status = 1;                          // 状态: serving/not_serving
+    google.protobuf.Timestamp timestamp = 2;    // 时间戳
+    string version = 3;                         // 服务版本
+}
+
+// 聊天请求
+message ChatRequest {
+    string message = 1;              // 用户消息
+    string session_id = 2;           // 会话ID（用于多轮对话）
+    string user_id = 3;              // 用户ID
+    string model = 4;                // 模型名称，如 gpt-4
+    float temperature = 5;           // 温度参数 0-1
+    int32 max_tokens = 6;            // 最大 token 数
+    repeated Message history = 7;    // 历史消息（上下文）
+}
+
+// 消息结构
+message Message {
+    string role = 1;                            // 角色: user/assistant/system
+    string content = 2;                         // 消息内容
+    google.protobuf.Timestamp timestamp = 3;    // 时间戳
+}
+
+// 聊天响应
+message ChatResponse {
+    string reply = 1;
+    int32 tokens_used = 2;      // 使用的 token 数
+}
+
+// 嵌入向量请求
+message EmbeddingRequest {
+    string text = 1;
+    string model = 2;           // 模型名称，如 text-embedding-ada-002
+}
+
+// 嵌入向量响应
+message EmbeddingResponse {
+    repeated float vector = 1;  // 向量数据
+    int32 dimension = 2;        // 向量维度
+}

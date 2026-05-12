@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "pb/user;user";
+
+import "google/protobuf/timestamp.proto";
+
+// 用户服务
+service UserService {
+    // 健康检查
+    rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
+    
+    // 用户登录
+    rpc Login (LoginRequest) returns (LoginResponse);
+    
+    // 用户登出
+    rpc Logout (LogoutRequest) returns (LogoutResponse);
+    
+    // 用户注册
+    rpc Register (RegisterRequest) returns (User);
+    
+    // 获取用户信息
+    rpc GetUser (GetUserRequest) returns (User);
+    
+    // 创建用户
+    rpc CreateUser (CreateUserRequest) returns (User);
+    
+    // 更新用户
+    rpc UpdateUser (UpdateUserRequest) returns (User);
+    
+    // 上传头像
+    rpc UploadAvatar (UploadAvatarRequest) returns (UploadResponse);
+    
+    // 上传证件照
+    rpc UploadCertificate (UploadCertificateRequest) returns (UploadResponse);
+    
+    // 删除用户
+    rpc DeleteUser (DeleteUserRequest) returns (DeleteResponse);
+    
+    // 列出用户
+    rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
+}
+
+// 健康检查请求
+message HealthCheckRequest {}
+
+// 健康检查响应
+message HealthCheckResponse {
+    string status = 1;      // 状态: serving/not_serving
+    int64 timestamp = 2;    // 时间戳
+    string version = 3;     // 服务版本
+}
+
+// 登录请求
+message LoginRequest {
+    string username = 1;      // 用户名或邮箱
+    string password = 2;      // 密码
+}
+
+// 登录响应
+message LoginResponse {
+    string token = 1;         // JWT Token
+    int64 user_id = 2;        // 用户ID
+    string username = 3;      // 用户名
+    string expires_at = 4;    // 过期时间
+}
+
+// 登出请求
+message LogoutRequest {
+    string token = 1;         // JWT Token
+}
+
+// 登出响应
+message LogoutResponse {
+    bool success = 1;         // 是否成功
+    string message = 2;       // 消息
+}
+
+// 注册请求
+message RegisterRequest {
+    string username = 1;      // 用户名
+    string email = 2;         // 邮箱
+    string password = 3;      // 密码
+    string confirm_password = 4; // 确认密码
+}
+
+// 获取用户请求
+message GetUserRequest {
+    int64 id = 1;
+}
+
+// 创建用户请求
+message CreateUserRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+}
+
+// 更新用户请求
+message UpdateUserRequest {
+    int64 id = 1;
+    string username = 2;
+    string email = 3;
+}
+
+// 上传头像请求
+message UploadAvatarRequest {
+    int64 user_id = 1;        // 用户ID
+    string avatar_url = 2;    // 头像URL（OSS/S3地址）
+}
+
+// 上传证件照请求
+message UploadCertificateRequest {
+    int64 user_id = 1;            // 用户ID
+    string certificate_url = 2;   // 证件照URL
+    string certificate_type = 3;  // 证件类型（id_card/passport等）
+}
+
+// 上传响应
+message UploadResponse {
+    string file_url = 1;      // 文件URL
+    string file_id = 2;       // 文件ID
+    string file_type = 3;     // 文件类型
+    int64 file_size = 4;      // 文件大小（字节）
+}
+
+// 删除用户请求
+message DeleteUserRequest {
+    int64 id = 1;
+}
+
+// 删除响应
+message DeleteResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// 列出用户请求
+message ListUsersRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+}
+
+// 列出用户响应
+message ListUsersResponse {
+    repeated User users = 1;
+    int32 total = 2;
+}
+
+// 用户信息
+message User {
+    int64 id = 1;
+    string username = 2;
+    string email = 3;
+    string phone = 4;           // 手机号
+    string avatar_url = 5;      // 头像URL
+    Address address = 6;        // 地址信息
+    google.protobuf.Timestamp created_at = 7;   // 创建时间
+    google.protobuf.Timestamp updated_at = 8;   // 更新时间
+}
+
+// 地址信息
+message Address {
+    string province = 1;        // 省份
+    string city = 2;            // 城市
+    string district = 3;        // 区县
+    string detail = 4;          // 详细地址
+}
