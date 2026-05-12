@@ -1,4 +1,4 @@
-module gateway
+module github.com/Erain-byte/GRPC-GO-GATEWAY/gateway
 
 go 1.26.2
 
