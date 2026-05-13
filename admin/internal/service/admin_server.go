@@ -9,6 +9,7 @@ import (
 	"admin/internal/utils"
 
 	"github.com/Erain-byte/GRPC-GO-GATEWAY/gateway/pb/admin"
+	pb "github.com/Erain-byte/GRPC-GO-GATEWAY/gateway/pb/admin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -16,11 +17,11 @@ import (
 
 // AdminServer 实现 AdminService 接口
 type AdminServer struct {
-	admin.UnimplementedAdminServiceServer
+	pb.UnimplementedAdminServiceServer
 }
 
 // HealthCheck 健康检查
-func (s *AdminServer) HealthCheck(ctx context.Context, req *admin.HealthCheckRequest) (*admin.HealthCheckResponse, error) {
+func (s *AdminServer) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
 	return &admin.HealthCheckResponse{
 		Status:    "serving",
 		Timestamp: time.Now().Unix(),
@@ -29,7 +30,7 @@ func (s *AdminServer) HealthCheck(ctx context.Context, req *admin.HealthCheckReq
 }
 
 // Login 管理员登录
-func (s *AdminServer) Login(ctx context.Context, req *admin.LoginRequest) (*admin.LoginResponse, error) {
+func (s *AdminServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	// 1. 参数校验（由 protoc-gen-validate 生成）
 	if err := req.Validate(); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "参数校验失败: %v", err)
@@ -70,16 +71,16 @@ func (s *AdminServer) Login(ctx context.Context, req *admin.LoginRequest) (*admi
 	createTime := timestamppb.New(adminModel.CreatedAt)
 	updateTime := timestamppb.New(adminModel.UpdatedAt)
 
-	return &admin.LoginResponse{
+	return &pb.LoginResponse{
 		Token: token,
-		Admin: &admin.Admin{
+		Admin: &pb.Admin{
 			Id:          int64(adminModel.ID),
 			Username:    adminModel.Username,
 			Email:       adminModel.Email,
 			Phone:       adminModel.Phone,
 			AvatarUrl:   adminModel.AvatarURL,
-			Role:        admin.AdminRole(adminModel.Role),
-			Status:      admin.AdminStatus(adminModel.Status),
+			Role:        pb.AdminRole(adminModel.Role),
+			Status:      pb.AdminStatus(adminModel.Status),
 			Permissions: []string{"all"}, // TODO: 根据角色加载权限
 			LastLoginAt: loginTime,
 			LastLoginIp: adminModel.LastLoginIP,
@@ -90,17 +91,17 @@ func (s *AdminServer) Login(ctx context.Context, req *admin.LoginRequest) (*admi
 }
 
 // GetAdmin 获取管理员信息
-func (s *AdminServer) GetAdmin(ctx context.Context, req *admin.GetAdminRequest) (*admin.Admin, error) {
+func (s *AdminServer) GetAdmin(ctx context.Context, req *pb.GetAdminRequest) (*pb.Admin, error) {
 	// TODO: 从数据库查询
 	now := timestamppb.Now()
-	return &admin.Admin{
+	return &pb.Admin{
 		Id:          req.Id,
 		Username:    "admin",
 		Email:       "admin@example.com",
 		Phone:       "13800138000",
 		AvatarUrl:   "",
-		Role:        admin.AdminRole_ROLE_SUPER_ADMIN,
-		Status:      admin.AdminStatus_STATUS_ACTIVE,
+		Role:        pb.AdminRole_ROLE_SUPER_ADMIN,
+		Status:      pb.AdminStatus_STATUS_ACTIVE,
 		Permissions: []string{"user.manage", "order.manage", "system.config"},
 		LastLoginAt: now,
 		LastLoginIp: "127.0.0.1",
@@ -110,17 +111,17 @@ func (s *AdminServer) GetAdmin(ctx context.Context, req *admin.GetAdminRequest) 
 }
 
 // UpdateAdmin 更新管理员信息
-func (s *AdminServer) UpdateAdmin(ctx context.Context, req *admin.UpdateAdminRequest) (*admin.Admin, error) {
+func (s *AdminServer) UpdateAdmin(ctx context.Context, req *pb.UpdateAdminRequest) (*pb.Admin, error) {
 	// TODO: 更新数据库
 	now := timestamppb.Now()
-	return &admin.Admin{
+	return &pb.Admin{
 		Id:          req.Id,
 		Username:    req.Username,
 		Email:       req.Email,
 		Phone:       "",
 		AvatarUrl:   "",
-		Role:        admin.AdminRole_ROLE_ADMIN,
-		Status:      admin.AdminStatus_STATUS_ACTIVE,
+		Role:        pb.AdminRole_ROLE_ADMIN,
+		Status:      pb.AdminStatus_STATUS_ACTIVE,
 		Permissions: []string{"user.manage"},
 		LastLoginAt: now,
 		LastLoginIp: "127.0.0.1",
@@ -130,9 +131,9 @@ func (s *AdminServer) UpdateAdmin(ctx context.Context, req *admin.UpdateAdminReq
 }
 
 // UploadAvatar 上传头像
-func (s *AdminServer) UploadAvatar(ctx context.Context, req *admin.UploadAvatarRequest) (*admin.UploadResponse, error) {
+func (s *AdminServer) UploadAvatar(ctx context.Context, req *pb.UploadAvatarRequest) (*pb.UploadResponse, error) {
 	// TODO: 验证文件、保存到OSS
-	return &admin.UploadResponse{
+	return &pb.UploadResponse{
 		FileUrl:  req.AvatarUrl,
 		FileId:   "file_123",
 		FileType: "avatar",
@@ -141,16 +142,16 @@ func (s *AdminServer) UploadAvatar(ctx context.Context, req *admin.UploadAvatarR
 }
 
 // ListAdmins 列出管理员
-func (s *AdminServer) ListAdmins(ctx context.Context, req *admin.ListAdminsRequest) (*admin.ListAdminsResponse, error) {
+func (s *AdminServer) ListAdmins(ctx context.Context, req *pb.ListAdminsRequest) (*pb.ListAdminsResponse, error) {
 	// TODO: 从数据库分页查询
 	now := timestamppb.Now()
-	admins := []*admin.Admin{
+	admins := []*pb.Admin{
 		{
 			Id:          1,
 			Username:    "admin",
 			Email:       "admin@example.com",
-			Role:        admin.AdminRole_ROLE_SUPER_ADMIN,
-			Status:      admin.AdminStatus_STATUS_ACTIVE,
+			Role:        pb.AdminRole_ROLE_SUPER_ADMIN,
+			Status:      pb.AdminStatus_STATUS_ACTIVE,
 			Permissions: []string{"user.manage", "order.manage"},
 			CreatedAt:   now,
 			UpdatedAt:   now,
@@ -159,15 +160,15 @@ func (s *AdminServer) ListAdmins(ctx context.Context, req *admin.ListAdminsReque
 			Id:          2,
 			Username:    "operator",
 			Email:       "operator@example.com",
-			Role:        admin.AdminRole_ROLE_OPERATOR,
-			Status:      admin.AdminStatus_STATUS_ACTIVE,
+			Role:        pb.AdminRole_ROLE_OPERATOR,
+			Status:      pb.AdminStatus_STATUS_ACTIVE,
 			Permissions: []string{"order.manage"},
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
 	}
 
-	return &admin.ListAdminsResponse{
+	return &pb.ListAdminsResponse{
 		Admins: admins,
 		Total:  int32(len(admins)),
 	}, nil

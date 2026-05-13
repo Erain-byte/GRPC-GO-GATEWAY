@@ -3,6 +3,7 @@ module github.com/Erain-byte/GRPC-GO-GATEWAY/gateway
 go 1.26.2
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v1.3.3
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.21.0
 	google.golang.org/grpc v1.80.0
