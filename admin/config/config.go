@@ -19,8 +19,9 @@ type Config struct {
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Port string
-	Mode string
+	Port     string
+	GrpcPort string
+	Mode     string
 }
 
 // DatabaseConfig 数据库配置
@@ -67,8 +68,9 @@ func LoadConfig() *Config {
 
 	return &Config{
 		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "8081"),
-			Mode: getEnv("SERVER_MODE", "debug"),
+			Port:     getEnv("SERVER_PORT", "8081"),
+			GrpcPort: getEnv("GRPC_PORT", "50051"),
+			Mode:     getEnv("SERVER_MODE", "debug"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
