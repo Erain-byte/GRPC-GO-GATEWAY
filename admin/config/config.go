@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -15,6 +16,17 @@ type Config struct {
 	JWT      JWTConfig
 	GRPC     GRPCConfig
 	Log      LogConfig
+	Consul   ConsulConfig
+}
+
+// ConsulConfig Consul 集群配置
+type ConsulConfig struct {
+	Addr           string
+	Datacenter     string
+	ServiceName    string
+	ServicePort    int
+	ServiceID      string
+	ServiceAddress string // 服务注册地址，留空则自动获取
 }
 
 // ServerConfig 服务器配置
@@ -69,7 +81,7 @@ func LoadConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
 			Port:     getEnv("SERVER_PORT", "8081"),
-			GrpcPort: getEnv("GRPC_PORT", "50051"),
+			GrpcPort: getEnv("GRPC_PORT", "9002"),
 			Mode:     getEnv("SERVER_MODE", "debug"),
 		},
 		Database: DatabaseConfig{
@@ -89,14 +101,36 @@ func LoadConfig() *Config {
 			Expire: getEnv("JWT_EXPIRE", "24h"),
 		},
 		GRPC: GRPCConfig{
-			AIService:   getEnv("GRPC_AI_SERVICE", "localhost:50052"),
-			UserService: getEnv("GRPC_USER_SERVICE", "localhost:50051"),
+			AIService:   getEnv("GRPC_AI_SERVICE", "localhost:9003"),
+			UserService: getEnv("GRPC_USER_SERVICE", "localhost:9004"),
 		},
 		Log: LogConfig{
 			Level:  getEnv("LOG_LEVEL", "info"),
 			Format: getEnv("LOG_FORMAT", "json"),
 		},
+		Consul: ConsulConfig{
+			Addr:           getEnv("CONSUL_ADDR", "127.0.0.1:8500"),
+			Datacenter:     getEnv("CONSUL_DATACENTER", "dc1"),
+			ServiceName:    getEnv("SERVICE_NAME", "admin-service"),
+			ServiceID:      getEnv("SERVICE_ID", "admin-1"),
+			ServicePort:    getEnvAsInt("GRPC_PORT", 9002),
+			ServiceAddress: getEnv("CONSUL_SERVICE_ADDRESS", ""), // 从环境变量读取
+		},
 	}
+}
+
+// getEnvAsInt 获取环境变量并转换为整数
+func getEnvAsInt(key string, defaultValue int) int {
+	valueStr := getEnv(key, "")
+	if valueStr == "" {
+		return defaultValue
+	}
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Printf("警告: 环境变量 %s 的值 '%s' 无法转换为整数，使用默认值 %d", key, valueStr, defaultValue)
+		return defaultValue
+	}
+	return value
 }
 
 // getEnv 获取环境变量，如果不存在则返回默认值

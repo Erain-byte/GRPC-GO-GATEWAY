@@ -10,12 +10,29 @@ import (
 
 // Config 全局配置结构
 type Config struct {
-	Server ServerConfig `mapstructure:"server"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Services ServicesConfig `mapstructure:"services"`
+	Consul   ConsulConfig   `mapstructure:"consul"`
+}
+
+// ... (其他结构体保持不变)
+
+// ConsulConfig Consul 集群配置
+type ConsulConfig struct {
+	Addr       string `mapstructure:"addr"`
+	Datacenter string `mapstructure:"datacenter"`
 }
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
 	Port string `mapstructure:"port"`
+}
+
+// ServicesConfig 后端微服务发现配置
+type ServicesConfig struct {
+	AdminServiceName string `mapstructure:"admin_service_name"` // Consul 中的服务名
+	// UserServicename  string `mapstructure:"user_service_name"`
+	// AiServiceName    string `mapstructure:"ai_service_name"`
 }
 
 // LoadConfig 加载配置
@@ -41,6 +58,11 @@ func LoadConfig() (*Config, error) {
 
 	// 3. 手动绑定环境变量到结构体字段
 	cfg.Server.Port = getEnvOrDefault("SERVER_PORT", "9000")
+	cfg.Services.AdminServiceName = getEnvOrDefault("ADMIN_SERVICE_NAME", "admin-service")
+
+	// Consul 配置
+	cfg.Consul.Addr = getEnvOrDefault("CONSUL_ADDR", "127.0.0.1:8500")
+	cfg.Consul.Datacenter = getEnvOrDefault("CONSUL_DATACENTER", "dc1")
 
 	return &cfg, nil
 }

@@ -23,7 +23,7 @@ func InitDB(cfg *config.Config) {
 		cfg.Database.Port,
 		cfg.Database.DBName,
 	)
-	log.Printf("数据库连接DSN: %s", dsn) // 添加这行
+	//log.Printf("数据库连接DSN: %s", dsn) // 添加这行
 
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -47,14 +47,7 @@ func InitDB(cfg *config.Config) {
 	if err := DB.AutoMigrate(&models.Admin{}); err != nil {
 		log.Fatalf("数据库迁移失败: %v", err)
 	}
-	log.Println("数据库迁移完成")
-
-	// 验证表是否存在
-	if DB.Migrator().HasTable(&models.Admin{}) {
-		log.Println("✅ 验证成功: admins 表已存在")
-	} else {
-		log.Println("❌ 验证失败: admins 表未找到")
-	}
 
 	log.Println("数据库连接成功")
+
 }
